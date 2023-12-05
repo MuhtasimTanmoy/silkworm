@@ -19,7 +19,6 @@
 #include <boost/asio/io_context.hpp>
 #include <catch2/catch.hpp>
 
-#include <silkworm/core/common/as_range.hpp>
 #include <silkworm/core/common/bytes_to_string.hpp>
 #include <silkworm/core/protocol/rule_set.hpp>
 #include <silkworm/core/types/block.hpp>
@@ -57,8 +56,6 @@ class DummyRuleSet : public protocol::IRuleSet {
     ValidationResult validate_ommers(const Block&, const BlockState&) override { return ValidationResult::kOk; }
 
     ValidationResult validate_block_header(const BlockHeader&, const BlockState&, bool) override { return ValidationResult::kOk; }
-
-    ValidationResult validate_seal(const BlockHeader&) override { return ValidationResult::kOk; }
 
     void initialize(EVM&) override {}
 
@@ -174,7 +171,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist, [&](const auto& header) {
             chain_fork_view.add(*header);
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);
@@ -255,7 +252,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist, [&](const auto& header) {
             chain_fork_view.add(*header);
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);
@@ -302,7 +299,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist_bis = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist_bis, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist_bis, [&](const auto& header) {
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);
         });
@@ -373,7 +370,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist, [&](const auto& header) {
             chain_fork_view.add(*header);
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);
@@ -420,7 +417,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist_bis = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist_bis, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist_bis, [&](const auto& header) {
             chain_fork_view.add(*header);
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);
@@ -491,7 +488,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist, [&](const auto& header) {
             chain_fork_view.add(*header);
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);
@@ -541,7 +538,7 @@ TEST_CASE("Headers receiving and saving") {
         // saving headers ready to persist as the header sync does in the forward() method
         Headers headers_to_persist_bis = header_chain.withdraw_stable_headers();
 
-        as_range::for_each(headers_to_persist_bis, [&](const auto& header) {
+        std::ranges::for_each(headers_to_persist_bis, [&](const auto& header) {
             chain_fork_view.add(*header);
             auto fake_block = std::make_shared<Block>(Block{{}, *header});
             exec_engine.insert_block(fake_block);

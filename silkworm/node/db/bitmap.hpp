@@ -38,7 +38,10 @@
 #include <silkworm/core/common/base.hpp>
 #include <silkworm/core/common/bytes.hpp>
 #include <silkworm/node/db/mdbx.hpp>
-#include <silkworm/node/etl/collector.hpp>
+
+namespace silkworm::etl {
+class Collector;
+}
 
 namespace silkworm::db::bitmap {
 
@@ -121,7 +124,7 @@ Bytes to_bytes(roaring::Roaring& bitmap);
 roaring::Roaring64Map parse(const mdbx::slice& data);
 
 //! \brief Parse 64-bit roaring bitmap from ByteView
-roaring::Roaring64Map parse(const ByteView data);
+roaring::Roaring64Map parse(ByteView data);
 
 //! \brief Parse 32-bit roaring bitmap from MDBX slice
 roaring::Roaring parse32(const mdbx::slice& data);

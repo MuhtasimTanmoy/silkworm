@@ -22,10 +22,10 @@
 
 #include <silkworm/core/common/util.hpp>
 #include <silkworm/core/crypto/ecdsa.h>
-#include <silkworm/core/execution/address.hpp>
 #include <silkworm/core/protocol/param.hpp>
 #include <silkworm/core/rlp/decode_vector.hpp>
 #include <silkworm/core/rlp/encode_vector.hpp>
+#include <silkworm/core/types/address.hpp>
 #include <silkworm/core/types/evmc_bytes32.hpp>
 
 #include "y_parity_and_chain_id.hpp"
@@ -47,9 +47,14 @@ bool Transaction::set_v(const intx::uint256& v) {
 }
 
 evmc::bytes32 Transaction::hash() const {
+    if (cached_hash_) {
+        return *cached_hash_;
+    }
+
     Bytes rlp;
     rlp::encode(rlp, *this, /*wrap_eip2718_into_string=*/false);
-    return std::bit_cast<evmc_bytes32>(keccak256(rlp));
+    cached_hash_ = (std::bit_cast<evmc_bytes32>(keccak256(rlp)));
+    return *cached_hash_;
 }
 
 namespace rlp {
@@ -146,8 +151,9 @@ namespace rlp {
         encode(to, txn.data);
     }
 
-    static void eip2718_encode_for_signing(Bytes& to, const UnsignedTransaction& txn, const Header h, bool wrap_into_array) {
-        if (wrap_into_array) {
+    static void eip2718_encode_for_signing(Bytes& to, const UnsignedTransaction& txn, const Header h,
+                                           bool wrap_eip2718_into_string) {
+        if (wrap_eip2718_into_string) {
             auto rlp_len{static_cast<size_t>(length_of_length(h.payload_length) + h.payload_length)};
             encode_header(to, {false, rlp_len + 1});
         }
@@ -284,16 +290,16 @@ namespace rlp {
         return decode_items(from, to.odd_y_parity, to.r, to.s);
     }
 
-    DecodingResult decode_transaction(ByteView& from, Transaction& to, Eip2718Wrapping allowed,
+    DecodingResult decode_transaction(ByteView& from, Transaction& to, Eip2718Wrapping accepted_typed_txn_wrapping,
                                       Leftover mode) noexcept {
-        to.from.reset();
+        to.reset();
 
         if (from.empty()) {
             return tl::unexpected{DecodingError::kInputTooShort};
         }
 
         if (0 < from[0] && from[0] < kEmptyStringCode) {  // Raw serialization of a typed transaction
-            if (allowed == Eip2718Wrapping::kString) {
+            if (accepted_typed_txn_wrapping == Eip2718Wrapping::kString) {
                 return tl::unexpected{DecodingError::kUnexpectedEip2718Serialization};
             }
 
@@ -329,7 +335,7 @@ namespace rlp {
 
         // String-wrapped typed transaction
 
-        if (allowed == Eip2718Wrapping::kNone) {
+        if (accepted_typed_txn_wrapping == Eip2718Wrapping::kNone) {
             return tl::unexpected{DecodingError::kUnexpectedEip2718Serialization};
         }
 
@@ -416,6 +422,11 @@ void Transaction::recover_sender() {
     if (!silkworm_recover_address(from->bytes, hash.bytes, signature, odd_y_parity, context)) {
         from = std::nullopt;
     }
+}
+
+void Transaction::reset() {
+    from.reset();
+    cached_hash_.reset();
 }
 
 intx::uint512 UnsignedTransaction::maximum_gas_cost() const {

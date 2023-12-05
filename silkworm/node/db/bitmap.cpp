@@ -22,6 +22,7 @@
 #include <silkworm/infra/common/binary_search.hpp>
 #include <silkworm/infra/common/ensure.hpp>
 #include <silkworm/infra/concurrency/signal_handler.hpp>
+#include <silkworm/node/etl/collector.hpp>
 
 namespace silkworm::db::bitmap {
 
@@ -296,9 +297,13 @@ std::optional<uint64_t> seek(const roaring::Roaring64Map& bitmap, uint64_t n) {
     return std::nullopt;
 }
 
-roaring::Roaring cut_left(roaring::Roaring& bm, uint64_t size_limit) { return cut_left_impl(bm, size_limit); }
+roaring::Roaring cut_left(roaring::Roaring& bitmap, uint64_t size_limit) {
+    return cut_left_impl(bitmap, size_limit);
+}
 
-roaring::Roaring64Map cut_left(roaring::Roaring64Map& bm, uint64_t size_limit) { return cut_left_impl(bm, size_limit); }
+roaring::Roaring64Map cut_left(roaring::Roaring64Map& bitmap, uint64_t size_limit) {
+    return cut_left_impl(bitmap, size_limit);
+}
 
 template <typename RoaringMap>
 Bytes bitmap_to_bytes(RoaringMap& bitmap) {

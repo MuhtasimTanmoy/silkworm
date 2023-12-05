@@ -16,7 +16,6 @@
 
 #include "sync.hpp"
 
-#include <chrono>
 #include <exception>
 #include <latch>
 
@@ -26,9 +25,11 @@
 #include <silkworm/infra/common/ensure.hpp>
 #include <silkworm/infra/common/log.hpp>
 #include <silkworm/infra/concurrency/thread_pool.hpp>
+#include <silkworm/infra/concurrency/thread_safe_queue.hpp>
 #include <silkworm/node/db/stages.hpp>
 #include <silkworm/node/etl/collector.hpp>
 #include <silkworm/node/snapshot/config.hpp>
+#include <silkworm/node/snapshot/index.hpp>
 #include <silkworm/node/snapshot/path.hpp>
 
 namespace silkworm::snapshot {
@@ -78,7 +79,7 @@ bool SnapshotSync::download_and_index_snapshots(db::RWTxn& txn) {
               << ", idx max block: " << repository_->idx_max_block() << ")";
 
     const auto snapshot_config = snapshot::Config::lookup_known_config(config_.chain_id, snapshot_file_names);
-    const auto configured_max_block_number = snapshot_config->max_block_number();
+    const auto configured_max_block_number = snapshot_config.max_block_number();
     SILK_INFO << "SnapshotSync: configured max block: " << configured_max_block_number;
 
     // Update chain and stage progresses in database according to available snapshots
@@ -112,11 +113,11 @@ bool SnapshotSync::download_snapshots(const std::vector<std::string>& snapshot_f
     }
 
     const auto snapshot_config = snapshot::Config::lookup_known_config(config_.chain_id, snapshot_file_names);
-    if (snapshot_config->preverified_snapshots().empty()) {
+    if (snapshot_config.preverified_snapshots().empty()) {
         SILK_ERROR << "SnapshotSync: no preverified snapshots found";
         return false;
     }
-    for (const auto& preverified_snapshot : snapshot_config->preverified_snapshots()) {
+    for (const auto& preverified_snapshot : snapshot_config.preverified_snapshots()) {
         SILK_TRACE << "SnapshotSync: adding info hash for preverified: " << preverified_snapshot.file_name;
         client_.add_info_hash(preverified_snapshot.file_name, preverified_snapshot.torrent_hash);
     }
@@ -126,7 +127,7 @@ bool SnapshotSync::download_snapshots(const std::vector<std::string>& snapshot_f
     };
     const auto added_connection = client_.added_subscription.connect(log_added);
 
-    const auto num_snapshots{std::ptrdiff_t(snapshot_config->preverified_snapshots().size())};
+    const auto num_snapshots{std::ptrdiff_t(snapshot_config.preverified_snapshots().size())};
     SILK_INFO << "SnapshotSync: sync started: [0/" << num_snapshots << "]";
 
     static int completed{0};

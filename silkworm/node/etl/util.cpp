@@ -25,20 +25,12 @@ std::string errno2str(int err_code) {
         (void)strncpy_s(msg, "Unknown error", _TRUNCATE);
     }
 #else
-    if (strerror_r(err_code, msg, sizeof(msg)) != 0) {
+    if (strerror_r(err_code, msg, sizeof(msg))) {
         (void)strncpy(msg, "Unknown error", sizeof(msg));
     }
 #endif
     msg[sizeof(msg) - 1] = '\0';
     return {msg};
-}
-
-bool operator<(const Entry& a, const Entry& b) {
-    auto diff{a.key.compare(b.key)};
-    if (diff == 0) {
-        return a.value < b.value;
-    }
-    return diff < 0;
 }
 
 }  // namespace silkworm::etl

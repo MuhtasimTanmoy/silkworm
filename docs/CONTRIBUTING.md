@@ -10,6 +10,8 @@ We follow the [C++ Core Guidelines][cpp-core-guidelines] as much as possible.
 
 ## Style Guide
 
+Every file should contain the Apache license boilerplate. Use `make lint` to check the proper license formatting.
+
 We adhere to [Google's C++ Style Guide][cpp-google-style-guide] with the following differences:
 
 * `snake_case()` for function names.
@@ -18,9 +20,9 @@ We adhere to [Google's C++ Style Guide][cpp-google-style-guide] with the followi
 * Exceptions are allowed outside the `core` library.
 * User-defined literals are allowed.
 * Maximum line length is 120, indentation is 4 spaces. Use `make fmt` to reformat according to the code style.
-* Add Apache copyright banners. Use `make lint` to check the proper banner style.
 * Use `#pragma once` in the headers instead of the classic `#ifndef` guards.
 * `template <Concept T>` syntax is allowed.
+* `<filesystem>` is allowed.
 
 In addition to the [Boost libraries permitted in the style guide](https://google.github.io/styleguide/cppguide.html#Boost), we allow:
 * Algorithm
@@ -54,7 +56,7 @@ Apart from the submodules and some auxiliary directories, Silkworm contains the 
 * [`silkworm/sentry`](./silkworm/sentry)
   <br /> This module implements the networking and protocol stacks for the `Sentry` component for an Ethereum node based on [Erigon architecture][erigon-interfaces].
   This module depends on the `core`, `infra` and `node` modules.
-* [`silkworm/rpc`](./silkworm/silkrpc)
+* [`silkworm/rpc`](./silkworm/rpc)
   <br /> This module implements the networking and protocol stacks for the `RpcDaemon` component for an Ethereum node based on [Erigon architecture][erigon-interfaces],
   exposing the vast majority of the [Ethereum JSON RPC Execution API][ethereum-execution-api]. This module depends on the `core`, `infra` and `node` modules.
 * [`silkworm/sync`](./silkworm/sync)

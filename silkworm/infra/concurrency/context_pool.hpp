@@ -22,6 +22,7 @@
 #include <functional>
 #include <memory>
 #include <ostream>
+#include <utility>
 #include <vector>
 
 #include <boost/asio/io_context.hpp>
@@ -117,7 +118,7 @@ class ContextPool : public ExecutorPool {
         for (std::size_t i{0}; i < contexts_.size(); ++i) {
             auto& context = contexts_[i];
             context_threads_.create_thread([&, i = i]() {
-                log::set_thread_name(std::string("asio_ctx_s" + std::to_string(i)).c_str());
+                log::set_thread_name(("asio_ctx_s" + std::to_string(i)).c_str());
                 SILK_TRACE << "Thread start context[" << i << "] thread_id: " << std::this_thread::get_id();
                 try {
                     context.execute_loop();
@@ -195,11 +196,11 @@ class ContextPool : public ExecutorPool {
     }
 
     void set_exception_handler(ExceptionHandler exception_handler) {
-        exception_handler_ = exception_handler;
+        exception_handler_ = std::move(exception_handler);
     }
 
   protected:
-    static void termination_handler(std::exception_ptr) {
+    static void termination_handler(std::exception_ptr) {  // NOLINT(performance-unnecessary-value-param)
         std::terminate();
     }
 

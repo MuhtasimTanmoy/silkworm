@@ -27,7 +27,7 @@
 
 #include <silkworm/buildinfo.h>
 #include <silkworm/core/common/bytes_to_string.hpp>
-#include <silkworm/core/execution/address.hpp>
+#include <silkworm/core/types/address.hpp>
 #include <silkworm/core/types/evmc_bytes32.hpp>
 #include <silkworm/infra/common/directories.hpp>
 #include <silkworm/infra/common/ensure.hpp>
@@ -35,6 +35,8 @@
 #include <silkworm/infra/concurrency/signal_handler.hpp>
 #include <silkworm/node/db/bitmap.hpp>
 #include <silkworm/node/db/mdbx.hpp>
+#include <silkworm/node/db/tables.hpp>
+#include <silkworm/node/db/util.hpp>
 #include <silkworm/node/types/log_cbor.hpp>
 
 #include "../common/common.hpp"

@@ -29,16 +29,16 @@
 #include <grpcpp/grpcpp.h>
 
 #include <silkworm/core/common/util.hpp>
-#include <silkworm/core/execution/address.hpp>
+#include <silkworm/core/types/address.hpp>
 #include <silkworm/infra/common/log.hpp>
 #include <silkworm/infra/grpc/client/client_context_pool.hpp>
 #include <silkworm/interfaces/remote/ethbackend.grpc.pb.h>
 #include <silkworm/interfaces/remote/kv.grpc.pb.h>
 #include <silkworm/interfaces/types/types.pb.h>
-#include <silkworm/silkrpc/common/constants.hpp>
-#include <silkworm/silkrpc/common/util.hpp>
-#include <silkworm/silkrpc/ethbackend/remote_backend.hpp>
-#include <silkworm/silkrpc/grpc/util.hpp>
+#include <silkworm/rpc/common/constants.hpp>
+#include <silkworm/rpc/common/util.hpp>
+#include <silkworm/rpc/ethbackend/remote_backend.hpp>
+#include <silkworm/rpc/grpc/util.hpp>
 
 using namespace silkworm;
 using namespace silkworm::rpc;

@@ -27,6 +27,7 @@
 #include <silkworm/infra/concurrency/awaitable_wait_for_one.hpp>
 #include <silkworm/infra/concurrency/event_notifier.hpp>
 #include <silkworm/infra/concurrency/timeout.hpp>
+#include <silkworm/sentry/discovery/disc_v4/common/ipv6_unsupported_error.hpp>
 #include <silkworm/sentry/discovery/disc_v4/common/message_expiration.hpp>
 #include <silkworm/sentry/discovery/disc_v4/common/node_distance.hpp>
 
@@ -63,8 +64,9 @@ Task<PingCheckResult> ping_check(
     boost::signals2::signal<void(PongMessage, EccPublicKey)>& on_pong_signal,
     node_db::NodeDb& db) {
     auto address = co_await db.find_node_address(node_id);
-    if (!address)
+    if (!address) {
         throw std::runtime_error("ping_check: node address not found");
+    }
     auto endpoint = address->to_common_address().endpoint;
 
     auto last_pong_time = co_await db.find_last_pong_time(node_id);
@@ -139,6 +141,10 @@ Task<PingCheckResult> ping_check(
     } catch (const boost::system::system_error& ex) {
         if (ex.code() == boost::system::errc::operation_canceled)
             throw;
+        log::Debug("disc_v4") << "ping_check failed to send_ping"
+                              << " to " << endpoint
+                              << " due to exception: " << ex.what();
+    } catch (const IPV6UnsupportedError& ex) {
         log::Debug("disc_v4") << "ping_check failed to send_ping"
                               << " to " << endpoint
                               << " due to exception: " << ex.what();

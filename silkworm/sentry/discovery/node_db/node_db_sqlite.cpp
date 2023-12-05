@@ -373,7 +373,7 @@ class NodeDbSqliteImpl : public NodeDb {
         if (value) {
             statement.bindNoCopy(1, value->data(), static_cast<int>(value->size()));
         } else {
-            statement.bind(0);
+            statement.bind(1);
         }
         statement.bind(2, id.hex());
         statement.exec();
@@ -607,9 +607,9 @@ class NodeDbSqliteImpl : public NodeDb {
     std::unique_ptr<SQLite::Database> db_;
 };
 
-NodeDbSqlite::NodeDbSqlite(boost::asio::any_io_executor executor)
+NodeDbSqlite::NodeDbSqlite(const boost::asio::any_io_executor& executor)
     : p_impl_(std::make_unique<NodeDbSqliteImpl>()),
-      interface_(std::make_unique<SerialNodeDb>(*p_impl_, std::move(executor))) {
+      interface_(std::make_unique<SerialNodeDb>(*p_impl_, executor)) {
 }
 
 NodeDbSqlite::~NodeDbSqlite() {

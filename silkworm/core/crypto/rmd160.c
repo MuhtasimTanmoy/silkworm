@@ -330,8 +330,8 @@ static inline void rmd160_compress(uint32_t* MDbuf, const uint32_t* X) {
  *  note: there are (lswlen mod 64) bytes left in strptr.
  */
 static inline void rmd160_finish(uint32_t* MDbuf, uint8_t const* strptr, uint32_t lswlen) {
-    unsigned int i; /* counter       */
-    uint32_t X[16]; /* message words */
+    unsigned int i = 0; /* counter       */
+    uint32_t X[16];     /* message words */
 
     memset(X, 0, 16 * sizeof(uint32_t));
 
@@ -358,17 +358,17 @@ static inline void rmd160_finish(uint32_t* MDbuf, uint8_t const* strptr, uint32_
 
 // Little-endian architecture is assumed
 static inline uint32_t load32(const void* src) {
-    uint32_t w;
+    uint32_t w = 0;
     memcpy(&w, src, sizeof w);
     return w;
 }
 
-void silkworm_rmd160(uint8_t out[20], const uint8_t* ptr, uint32_t len) {
+void silkworm_rmd160(uint8_t out[20], const uint8_t* input, uint32_t len) {
     uint32_t buf[160 / 32];
-
     rmd160_init(buf);
 
     uint32_t current[16];
+    const uint8_t* ptr = input;
     for (size_t remaining = len; remaining >= 64; remaining -= 64) {
         for (size_t i = 0; i < 16; ++i) {
             current[i] = load32(ptr);

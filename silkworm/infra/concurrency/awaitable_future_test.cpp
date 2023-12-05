@@ -22,6 +22,7 @@
 #include <boost/asio/cancellation_signal.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 #include <catch2/catch.hpp>
 
@@ -33,8 +34,8 @@ namespace asio = boost::asio;
 using concurrency::AwaitableFuture;
 using concurrency::AwaitablePromise;
 
-auto create_promise_and_set_value(asio::any_io_executor executor, int value) {
-    concurrency::AwaitablePromise<int> promise{std::move(executor)};
+auto create_promise_and_set_value(const asio::any_io_executor& executor, int value) {
+    concurrency::AwaitablePromise<int> promise{executor};
     promise.set_value(value);
     return promise.get_future();
 }
@@ -46,7 +47,7 @@ class TestException : public std::runtime_error {
 
 TEST_CASE("awaitable future") {
     asio::io_context io;
-    asio::io_context::work work{io};
+    asio::executor_work_guard<asio::io_context::executor_type> work_guard{io.get_executor()};
     AwaitablePromise<int> promise{io.get_executor()};
 
     SECTION("trivial use") {
@@ -123,7 +124,7 @@ TEST_CASE("awaitable future") {
     SECTION("writing and reading from different threads") {
         auto future = promise.get_future();
 
-        int value;
+        int value{0};
         std::thread concurrent(
             [&](AwaitableFuture<int>&& moved_future) {
                 value = moved_future.get();
@@ -142,7 +143,7 @@ TEST_CASE("awaitable future") {
     SECTION("writing and reading from different threads") {
         auto future = promise.get_future();
 
-        int value;
+        int value{0};
         std::thread concurrent(
             [&](AwaitableFuture<int>&& moved_future) {
                 value = moved_future.get();
@@ -165,7 +166,7 @@ TEST_CASE("awaitable future") {
     }
 
     SECTION("using coroutines in read in the same io_context, write before read") {
-        int value;
+        int value{0};
 
         asio::co_spawn(
             io,
@@ -185,7 +186,7 @@ TEST_CASE("awaitable future") {
     SECTION("variation of using coroutines in the same io_context, write before read") {
         auto future = promise.get_future();
 
-        int value;
+        int value{0};
         asio::co_spawn(
             io,
             [&]() -> Task<void> {
@@ -203,7 +204,7 @@ TEST_CASE("awaitable future") {
     SECTION("moving AwaitableFuture") {
         auto future = promise.get_future();
 
-        int value;
+        int value{0};
         auto lambda = [&](AwaitableFuture<int>&& moved_future) -> Task<void> {
             value = co_await moved_future.get_async();
             io.stop();
@@ -218,7 +219,7 @@ TEST_CASE("awaitable future") {
     }
 
     SECTION("using coroutine for both read and write, read before write") {
-        int value;
+        int value{0};
 
         asio::co_spawn(
             io,
@@ -243,7 +244,7 @@ TEST_CASE("awaitable future") {
     }
 
     SECTION("cancellation after read") {
-        int value;
+        int value{0};
         boost::system::error_code code;
 
         boost::asio::cancellation_signal cancellation_signal;

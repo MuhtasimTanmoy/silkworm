@@ -28,8 +28,8 @@
 #include <silkworm/infra/grpc/client/client_context_pool.hpp>
 #include <silkworm/node/db/mdbx.hpp>
 #include <silkworm/node/stagedsync/client.hpp>
+#include <silkworm/rpc/daemon.hpp>
 #include <silkworm/sentry/api/common/sentry_client.hpp>
-#include <silkworm/silkrpc/daemon.hpp>
 
 #include "block_exchange.hpp"
 #include "chain_sync.hpp"
@@ -47,7 +47,7 @@ struct EngineRpcSettings {
 
 class Sync {
   public:
-    Sync(boost::asio::any_io_executor executor,
+    Sync(const boost::asio::any_io_executor& executor,
          mdbx::env chaindata_env,
          execution::Client& execution,
          const std::shared_ptr<silkworm::sentry::api::SentryClient>& sentry_client,

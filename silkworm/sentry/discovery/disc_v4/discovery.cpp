@@ -44,7 +44,7 @@ namespace silkworm::sentry::discovery::disc_v4 {
 class DiscoveryImpl : private MessageHandler {
   public:
     DiscoveryImpl(
-        boost::asio::any_io_executor executor,
+        const boost::asio::any_io_executor& executor,
         uint16_t server_port,
         std::function<EccKeyPair()> node_key,
         std::function<EnodeUrl()> node_url,
@@ -186,8 +186,9 @@ class DiscoveryImpl : private MessageHandler {
                 auto current_enr_seq_num = co_await node_db_.find_enr_seq_num(node_id);
                 if (current_enr_seq_num != ping_check_result.enr_seq_num) {
                     auto address = co_await node_db_.find_node_address(node_id);
-                    if (!address)
+                    if (!address) {
                         throw std::runtime_error("ping_check: node address not found");
+                    }
                     auto endpoint = address->to_common_address().endpoint;
                     auto enr_record = co_await enr::fetch_enr_record(node_id, std::move(endpoint), server_, on_enr_response_signal_);
                     if (enr_record) {
@@ -224,13 +225,13 @@ class DiscoveryImpl : private MessageHandler {
 };
 
 Discovery::Discovery(
-    boost::asio::any_io_executor executor,
+    const boost::asio::any_io_executor& executor,
     uint16_t server_port,
     std::function<EccKeyPair()> node_key,
     std::function<EnodeUrl()> node_url,
     std::function<discovery::enr::EnrRecord()> node_record,
     node_db::NodeDb& node_db)
-    : p_impl_(std::make_unique<DiscoveryImpl>(std::move(executor), server_port, std::move(node_key), std::move(node_url), std::move(node_record), node_db)) {}
+    : p_impl_(std::make_unique<DiscoveryImpl>(executor, server_port, std::move(node_key), std::move(node_url), std::move(node_record), node_db)) {}
 
 Discovery::~Discovery() {
     log::Trace("sentry") << "silkworm::sentry::discovery::disc_v4::Discovery::~Discovery";
