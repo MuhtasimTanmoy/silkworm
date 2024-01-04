@@ -268,7 +268,9 @@ void RWTxnManaged::commit_and_stop() {
 }
 
 RWTxnUnmanaged::~RWTxnUnmanaged() {
-    abort();
+    if (handle_) {
+        abort();
+    }
 }
 
 void RWTxnUnmanaged::abort() {
@@ -309,6 +311,7 @@ void RWTxnUnmanaged::commit() {
     if (err.code() != MDBX_SUCCESS) {
         err.throw_exception();
     }
+    SILKWORM_ASSERT(!handle_);
     SILK_TRACE << "Commit latency" << detail::log_args_for_commit_latency(commit_latency);
 }
 

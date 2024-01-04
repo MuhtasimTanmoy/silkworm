@@ -372,7 +372,7 @@ struct EnvConfig {
     size_t page_size{os::page_size()};  // Mdbx page size
     size_t max_size{3_Tebi};            // Mdbx max map size
     size_t growth_size{2_Gibi};         // Increment size for each extension
-    uint32_t max_tables{128};           // Default max number of named tables
+    uint32_t max_tables{256};           // Default max number of named tables
     uint32_t max_readers{100};          // Default max number of readers
 };
 
@@ -394,12 +394,12 @@ struct EnvConfig {
 //! \return A handle to the opened cursor
 ::mdbx::cursor_managed open_cursor(::mdbx::txn& tx, const MapConfig& config);
 
-//! \brief Computes the max size of value data to fit in a leaf data page
-//! \param [in] page_size : the actually configured MDBX's page size
+//! \brief Computes the max size of single-value data to fit into a leaf data page
+//! \param [in] page_size : the actually configured MDBX page size
 //! \param [in] key_size : the known key size to fit in bundle computed value size
 size_t max_value_size_for_leaf_page(size_t page_size, size_t key_size);
 
-//! \brief Computes the max size of value data to fit in a leaf data page
+//! \brief Computes the max size of single-value data to fit into a leaf data page
 //! \param [in] txn : the transaction used to derive pagesize from
 //! \param [in] key_size : the known key size to fit in bundle computed value size
 size_t max_value_size_for_leaf_page(const ::mdbx::txn& txn, size_t key_size);
